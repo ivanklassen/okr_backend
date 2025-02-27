@@ -22,29 +22,44 @@ namespace okr_backend.Controllers
             _context = context;
         }
 
-        //[HttpPost("registration")]
-        //public async Task<IActionResult> Register([FromBody] User user)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest();
-        //    }
-        //    if (user.password != user.confirmPassword)
-        //    {
-        //        return BadRequest();
-        //    }
+        [HttpPost("registration")]
+        public async Task<IActionResult> Register([FromBody] RegistrationModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            if (model.password != model.confirmPassword)
+            {
+                return BadRequest();
+            }
 
-        //    user.Id = Guid.NewGuid();
-        //    user.isTeacher = false;
-        //    user.isStudent = false;
-        //    user.isAdmin = false;
+            var emailUser = await _context.Users.FirstOrDefaultAsync(p => p.email == model.email);
 
-        //    await _context.AddAsync(user);
-        //    await _context.SaveChangesAsync();
+            if (emailUser != null)
+            {
+                return BadRequest();
+            }
 
-        //    var token = GenerateJwtToken(user);
-        //    return Ok(token);
-        //}
+            User user = new User();
+
+            user.fullName = model.fullName;
+            user.birthDate = model.birthDate;
+            user.email = model.email;
+            user.password = model.password;
+
+            user.Id = Guid.NewGuid();
+            user.isTeacher = false;
+            user.isStudent = false;
+            user.isAdmin = false;
+            user.isDean = false;
+
+            await _context.AddAsync(user);
+            await _context.SaveChangesAsync();
+
+            var token = GenerateJwtToken(user.Id, user.fullName, user.email);
+            return Ok(new AuthResponse { Token = token });
+        }
 
         [HttpPost("login")]
         public async Task<IActionResult> login([FromBody] LoginModel loginModel)
@@ -60,7 +75,7 @@ namespace okr_backend.Controllers
                 return Unauthorized("Invalid email or password");
             }
 
-            var token = GenerateJwtTokenLogin(user.Id, user.fullName, user.email);
+            var token = GenerateJwtToken(user.Id, user.fullName, user.email);
             return Ok(new AuthResponse { Token = token });
         }
 
@@ -83,7 +98,7 @@ namespace okr_backend.Controllers
         //    return new JwtSecurityTokenHandler().WriteToken(jwtToken);
         //}
 
-        private string GenerateJwtTokenLogin(Guid id, string fullName, string email)
+        private string GenerateJwtToken(Guid id, string fullName, string email)
         {
 
             var claims = new List<Claim>
