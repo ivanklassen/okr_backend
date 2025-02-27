@@ -22,11 +22,6 @@ namespace okr_backend.Models
         [MaxLength(32)]
         public string? password { get; set; }
 
-        [Required]
-        [MinLength(6)]
-        [MaxLength(32)]
-        public string? confirmPassword { get; set; }
-
         public bool isStudent { get; set; }
 
         public bool isTeacher { get; set; }
