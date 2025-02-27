@@ -1,0 +1,6 @@
+@okr_backend_HostAddress = http://localhost:5048
+
+GET {{okr_backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
