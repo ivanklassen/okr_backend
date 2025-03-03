@@ -42,11 +42,33 @@ namespace okr_backend.Controllers
         [HttpPost("user/{id}/role")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserModel))]
-        public IActionResult changeUserRole([FromBody] ChangeUserRoleModel role, Guid id)
+        public async Task<IActionResult> changeUserRole([FromBody] ChangeUserRoleModel role, Guid id)
         {
-            UserModel user = new UserModel();
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
 
-            //some code
+            var user = await _context.Users.FirstOrDefaultAsync(p => p.Id == id);
+
+            if (role.role == Role.Student)
+            {
+                user.isStudent = !user.isStudent;
+            }
+            if (role.role == Role.Teacher)
+            {
+                user.isTeacher = !user.isTeacher;
+            }
+            if (role.role == Role.Dean)
+            {
+                user.isDean = !user.isDean;
+            }
+            if (role.role == Role.Admin)
+            {
+                user.isAdmin = !user.isAdmin;
+            }
+
+            await _context.SaveChangesAsync();
 
             return Ok(user);
         }
@@ -54,13 +76,16 @@ namespace okr_backend.Controllers
         [HttpGet("users")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<UserShortModel>))]
-        public IActionResult getAllUsers()
+        public async Task<List<UserShortModel>> getAllUsers()
         {
-            List<UserShortModel> users = new List<UserShortModel>();
 
-            //some code
-
-            return Ok(users);
+            return await _context.Users.Select(p => new UserShortModel
+            {
+                Id = p.Id,
+                surname = p.surname,
+                name = p.name
+            }).
+            ToListAsync();
         }
     }
 }

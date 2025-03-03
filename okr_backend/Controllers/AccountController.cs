@@ -52,7 +52,7 @@ namespace okr_backend.Controllers
 
             user.Id = Guid.NewGuid();
             user.isTeacher = false;
-            user.isStudent = false;
+            user.isStudent = true;
             user.isAdmin = false;
             user.isDean = false;
 
@@ -81,25 +81,6 @@ namespace okr_backend.Controllers
             var token = GenerateJwtToken(user.Id, user.surname, user.email);
             return Ok(new AuthResponse { Token = token });
         }
-
-        //private string GenerateJwtToken(User user)
-        //{
-        //    var claims = new List<Claim>
-        //    {
-        //        new Claim(ClaimTypes.Name, user.fullName),
-        //        new Claim(ClaimTypes.Email, user.email)
-        //    };
-
-        //    var jwtToken = new JwtSecurityToken(
-        //        expires: DateTime.UtcNow.AddHours(2),
-        //        claims: claims,
-        //        signingCredentials:
-        //        new SigningCredentials(
-        //            new SymmetricSecurityKey(
-        //                Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"])), SecurityAlgorithms.HmacSha256));
-
-        //    return new JwtSecurityTokenHandler().WriteToken(jwtToken);
-        //}
 
         private string GenerateJwtToken(Guid id, string fullName, string email)
         {
@@ -164,13 +145,13 @@ namespace okr_backend.Controllers
 
             var user = await _context.Users.FirstOrDefaultAsync(p => p.Id.ToString() == id);
 
-            var userLogin = new UserProfileModel();
-            //userLogin.surname = user.surname;
-            //userLogin.email = user.email;
-            //userLogin.name = user.name;
-            //userLogin.patronymic = user.patronymic
+            var profile = new UserProfileModel();
+            profile.surname = user.surname;
+            profile.email = user.email;
+            profile.name = user.name;
+            profile.patronymic = user.patronymic;
 
-            return Ok(userLogin);
+            return Ok(profile);
         }
 
         [HttpPut("profile")]
@@ -183,16 +164,17 @@ namespace okr_backend.Controllers
             var user = await _context.Users.FirstOrDefaultAsync(p => p.Id.ToString() == id);
 
 
-            //user.surname = model.surname;
-            //user.name = model.name;
-            //user.patronymic = model.patronymic;
+            user.surname = model.surname;
+            user.name = model.name;
+            user.patronymic = model.patronymic;
 
-            //await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
             var profile = new UserProfileModel();
-            //profile.fullName = user.fullName;
-            //profile.email = user.email;
-            //profile.birthDate = user.birthDate;
+            profile.surname = user.surname;
+            profile.name = user.name;
+            profile.patronymic = user.patronymic;
+            profile.email = user.email;
 
             return Ok(profile);
         }
