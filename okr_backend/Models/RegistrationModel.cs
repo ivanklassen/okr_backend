@@ -6,11 +6,12 @@ namespace okr_backend.Models
     {
 
         [Required]
-        [MinLength(1)]
-        public string? fullName { get; set; }
+        public string? surname { get; set; }
 
         [Required]
-        public DateTime birthDate { get; set; }
+        public string? name { get; set; }
+
+        public string? patronymic { get; set; }
 
         [MinLength(1)]
         [Required]

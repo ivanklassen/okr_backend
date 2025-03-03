@@ -23,6 +23,7 @@ namespace okr_backend.Controllers
         }
 
         [HttpPost("registration")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AuthResponse))]
         public async Task<IActionResult> Register([FromBody] RegistrationModel model)
         {
             if (!ModelState.IsValid)
@@ -43,8 +44,9 @@ namespace okr_backend.Controllers
 
             User user = new User();
 
-            user.fullName = model.fullName;
-            user.birthDate = model.birthDate;
+            user.surname = model.surname;
+            user.name = model.name;
+            user.patronymic = model.patronymic;
             user.email = model.email;
             user.password = model.password;
 
@@ -57,11 +59,12 @@ namespace okr_backend.Controllers
             await _context.AddAsync(user);
             await _context.SaveChangesAsync();
 
-            var token = GenerateJwtToken(user.Id, user.fullName, user.email);
+            var token = GenerateJwtToken(user.Id, user.surname, user.email);
             return Ok(new AuthResponse { Token = token });
         }
 
         [HttpPost("login")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AuthResponse))]
         public async Task<IActionResult> login([FromBody] LoginModel loginModel)
         {
             if (!ModelState.IsValid)
@@ -75,7 +78,7 @@ namespace okr_backend.Controllers
                 return Unauthorized("Invalid email or password");
             }
 
-            var token = GenerateJwtToken(user.Id, user.fullName, user.email);
+            var token = GenerateJwtToken(user.Id, user.surname, user.email);
             return Ok(new AuthResponse { Token = token });
         }
 
@@ -150,6 +153,48 @@ namespace okr_backend.Controllers
                 return false;
             }
             return true;
+        }
+
+        [HttpGet("profile")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserProfileModel))]
+        public async Task<IActionResult> getCurrentUsersProfile()
+        {
+            var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var user = await _context.Users.FirstOrDefaultAsync(p => p.Id.ToString() == id);
+
+            var userLogin = new UserProfileModel();
+            //userLogin.surname = user.surname;
+            //userLogin.email = user.email;
+            //userLogin.name = user.name;
+            //userLogin.patronymic = user.patronymic
+
+            return Ok(userLogin);
+        }
+
+        [HttpPut("profile")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserProfileModel))]
+        public async Task<IActionResult> editCurrentUsersProfile([FromBody] EditUserProfileModel model)
+        {
+            var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var user = await _context.Users.FirstOrDefaultAsync(p => p.Id.ToString() == id);
+
+
+            //user.surname = model.surname;
+            //user.name = model.name;
+            //user.patronymic = model.patronymic;
+
+            //await _context.SaveChangesAsync();
+
+            var profile = new UserProfileModel();
+            //profile.fullName = user.fullName;
+            //profile.email = user.email;
+            //profile.birthDate = user.birthDate;
+
+            return Ok(profile);
         }
     }
 }
