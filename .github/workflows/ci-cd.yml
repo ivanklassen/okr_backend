@@ -65,6 +65,5 @@ jobs:
         DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
       run: |
         ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST 
-        echo 'yes'
         "mkdir -p $DEPLOY_PATH"
         rsync -avz --delete-after ./publish/ $SERVER_USER@$SERVER_HOST:$DEPLOY_PATH
