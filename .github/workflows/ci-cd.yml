@@ -54,6 +54,5 @@ jobs:
         SERVER_HOST: ${{ secrets.SERVER_HOST }}
         DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
       run: |
-        echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
-        ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST "mkdir -p $DEPLOY_PATH"
+        echo ssh -i "$SSH_PRIVATE_KEY" -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST "mkdir -p $DEPLOY_PATH"
         rsync -avz --delete-after ./publish/ $SERVER_USER@$SERVER_HOST:$DEPLOY_PATH
