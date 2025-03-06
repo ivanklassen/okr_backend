@@ -45,7 +45,7 @@ jobs:
       run: dotnet restore
 
     - name: Build
-      run: dotnet publish --configuration Release --output ./publish
+      run: dotnet publish --configuration Release --runtime linux-x64 --output ./publish
 
     - name: Set up SSH
       env:
