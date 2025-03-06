@@ -5,8 +5,6 @@
     {
         public Guid Id { get; set; }
 
-        public Guid userId { get; set; }
-
         public DateTime fromDate { get; set; }
 
         public DateTime toDate { get; set; }
@@ -16,6 +14,12 @@
         public string? image { get; set; }
 
         public Status status { get; set; }
+
+        public Guid userId { get; set; }
+
+        public User user { get; set; }
+
+        public List<extensionApplication> extensions { get; set; }
 
 
     }

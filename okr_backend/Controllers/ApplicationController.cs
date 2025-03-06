@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using okr_backend.Models;
 using okr_backend.Persistence;
+using System.Security.Claims;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace okr_backend.Controllers
 {
@@ -20,9 +23,28 @@ namespace okr_backend.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<FullApplicationModel>))]
         public async Task<IActionResult> getApplications()
         {
-            List<FullApplicationModel> applications = new List<FullApplicationModel>();
+            List<FullApplicationModel> applications = _context.Applications.Include(p => p.extensions)
+                .Select(p => new FullApplicationModel
+                {
+                    Id = p.Id,
+                    userId = p.userId,
+                    fromDate = p.fromDate,
+                    toDate = p.toDate,
+                    description = p.description,
+                    image = p.image,
+                    status = p.status,
+                    extensions = p.extensions.Select(p => new ExtensionApplicationModel
+                    {
+                        Id = p.Id,
+                        applicationId = p.applicationId,
+                        extensionToDate = p.extensionToDate,
+                        description = p.description,
+                        image = p.image,
+                        status = p.status,
+                    }).ToList()
+                })
+                .ToList();
 
-            // some code
 
             return Ok(applications);
         }
@@ -31,16 +53,39 @@ namespace okr_backend.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApplicationModel))]
         public async Task<IActionResult> createApplication([FromBody] CreateApplicationModel model)
         {
+            var idstr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            Guid id;
+            Guid.TryParse(idstr, out id);
+
             if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
 
-            ApplicationModel application = new ApplicationModel();
+            Models.Application application = new Models.Application();
+            ApplicationModel app = new ApplicationModel();
 
-            // some code
+            application.Id = Guid.NewGuid();
+            application.userId = id;
+            application.fromDate = model.fromDate;
+            application.toDate = model.toDate;
+            application.description = model.description;
+            application.image = model.image;
+            application.status = Status.inProcess;
 
-            return Ok(application);
+            await _context.AddAsync(application);
+            await _context.SaveChangesAsync();
+
+            app.Id = application.Id;
+            app.userId = id;
+            app.fromDate = model.fromDate;
+            app.toDate = model.toDate;
+            app.description = model.description;
+            app.image = model.image;
+            app.status = Status.inProcess;
+
+            return Ok(app);
         }
 
         [HttpPut("application/{id}")]
@@ -52,9 +97,24 @@ namespace okr_backend.Controllers
                 return BadRequest();
             }
 
+            var app = await _context.Applications.FirstOrDefaultAsync(p => p.Id == id);
+
+            app.fromDate = model.fromDate;
+            app.toDate = model.toDate;
+            app.description = model.description;
+            app.image = model.image;
+
+            await _context.SaveChangesAsync();
+
             ApplicationModel application = new ApplicationModel();
 
-            // some code
+            application.Id = app.Id;
+            application.userId = app.userId;
+            application.fromDate = model.fromDate;
+            application.toDate = model.toDate;
+            application.description = model.description;
+            application.image = model.image;
+            application.status = app.status;
 
             return Ok(application);
         }
@@ -63,7 +123,7 @@ namespace okr_backend.Controllers
         public async Task<IActionResult> deleteApplication(Guid id)
         {
 
-            // some code
+            await _context.Applications.Where(p => p.Id == id).ExecuteDeleteAsync();
 
             return Ok();
         }
@@ -72,22 +132,75 @@ namespace okr_backend.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<FullApplicationModel>))]
         public async Task<IActionResult> getMyApplications()
         {
-            List<FullApplicationModel> applications = new List<FullApplicationModel>();
+            var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            // some code
+            List<FullApplicationModel> applications = _context.Applications.Where(p => p.userId.ToString() == id).Include(p => p.extensions)
+                .Select(p => new FullApplicationModel
+                {
+                    Id = p.Id,
+                    userId = p.userId,
+                    fromDate = p.fromDate,
+                    toDate = p.toDate,
+                    description = p.description,
+                    image = p.image,
+                    status = p.status,
+                    extensions = p.extensions.Select(p => new ExtensionApplicationModel
+                    {
+                        Id = p.Id,
+                        applicationId = p.applicationId,
+                        extensionToDate = p.extensionToDate,
+                        description = p.description,
+                        image = p.image,
+                        status = p.status,
+                    }).ToList()
+                })
+                .ToList();
+
 
             return Ok(applications);
+
         }
 
         [HttpPost("application/{id}/status")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FullApplicationModel))]
-        public async Task<IActionResult> EditStatusApplication([FromBody] ChangeStatusApplication status)
+        public async Task<IActionResult> EditStatusApplication([FromBody] ChangeStatusApplication status, Guid id)
         {
-            FullApplicationModel application = new FullApplicationModel();
+            var app = await _context.Applications.FirstOrDefaultAsync(p => p.Id == id);
 
-            // some code
+            if (status.status == Status.Accepted)
+            {
+                app.status = Status.Accepted;
+            }
+            if (status.status == Status.Rejected)
+            {
+                app.status = Status.Rejected;
+            }
 
-            return Ok(application);
+            await _context.SaveChangesAsync();
+
+            FullApplicationModel model = _context.Applications.Where(p => p.Id == id).Include(p => p.extensions)
+                .Select(p => new FullApplicationModel
+                {
+                    Id = p.Id,
+                    userId = p.userId,
+                    fromDate = p.fromDate,
+                    toDate = p.toDate,
+                    description = p.description,
+                    image = p.image,
+                    status = p.status,
+                    extensions = p.extensions.Select(p => new ExtensionApplicationModel
+                    {
+                        Id = p.Id,
+                        applicationId = p.applicationId,
+                        extensionToDate = p.extensionToDate,
+                        description = p.description,
+                        image = p.image,
+                        status = p.status,
+                    }).ToList()
+                })
+                .FirstOrDefault();
+
+            return Ok(model);
         }
 
     }

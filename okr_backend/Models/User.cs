@@ -29,5 +29,7 @@ namespace okr_backend.Models
 
         public bool isAdmin { get; set; }
 
+        public List<Application> applications { get; set; }
+
     }
 }
