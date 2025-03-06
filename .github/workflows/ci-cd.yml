@@ -57,7 +57,6 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H "$SERVER_HOST" >> ~/.ssh/known_hosts
 
-
     - name: Deploy to server
       env:
         SERVER_USER: ${{ secrets.SERVER_USER }}
@@ -65,5 +64,5 @@ jobs:
         DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
       run: |
         ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST 
-        "mkdir -p $DEPLOY_PATH"
-        rsync -avz --delete-after ./publish/ $SERVER_USER@$SERVER_HOST:$DEPLOY_PATH
+        mkdir -p $DEPLOY_PATH
+        cp -r ./publish/* $DEPLOY_PATH
