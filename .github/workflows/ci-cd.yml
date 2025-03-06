@@ -66,3 +66,5 @@ jobs:
         ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST 
         mkdir -p $DEPLOY_PATH
         cp -r ./publish/* $DEPLOY_PATH
+        cd $DEPLOY_PATH
+        nohup dotnet okr_backend.dll --urls "http://0.0.0.0:1223" > output.log 2>&1 &
