@@ -37,9 +37,6 @@ jobs:
     #- name: Install EF Core tools
     #  run: dotnet tool install --global dotnet-ef
 
-    #- name: Add .NET tools to PATH
-    #  run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
-
     # Шаг 7: Генерируем SQL-скрипт миграций
     - name: Generate migrations SQL script
       run: |
@@ -49,7 +46,7 @@ jobs:
 
         sudo rm -r /home/clear_back
         sudo cp -r ./okr_backend/ /home/clear_back
-        who
+        whoami
 
         sudo dotnet ef migrations script --output home/clear_back/migrations.sql --idempotent --project home/clear_back/
 
