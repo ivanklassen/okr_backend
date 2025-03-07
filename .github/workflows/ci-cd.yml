@@ -33,7 +33,17 @@ jobs:
     - name: Publish application
       run: dotnet publish --configuration Release --no-build --output ./artifacts
 
-    # Шаг 6: Сохраняем артефакты для использования в следующем этапе
+    # Шаг 6: Устанавливаем инструмент dotnet-ef
+    - name: Install EF Core tools
+      run: dotnet tool install --global dotnet-ef --version 8.0.0
+
+    # Шаг 7: Генерируем SQL-скрипт миграций
+    - name: Generate migrations SQL script
+      run: |
+        # Укажите путь к проекту, если он не в корне репозитория
+        dotnet ef migrations script --output ./migrations.sql --idempotent --project ./okr_backend
+
+    # Шаг 8: Сохраняем артефакты для использования в следующем этапе
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -41,9 +51,42 @@ jobs:
         path: ./artifacts/
         retention-days: 1  # Артефакты будут храниться 1 день
 
-  deploy:
+    # Шаг 9: Сохраняем SQL-скрипт миграций как артефакт
+    - name: Upload migrations SQL script
+      uses: actions/upload-artifact@v4
+      with:
+        name: migrations-sql
+        path: ./migrations.sql
+        retention-days: 1
+
+  migrate:
     runs-on: self-hosted
     needs: build
+
+    steps:
+    # Шаг 1: Скачиваем SQL-скрипт миграций
+    - name: Download migrations SQL script
+      uses: actions/download-artifact@v4
+      with:
+        name: migrations-sql
+        path: ./migrations/
+
+    # Шаг 2: Убеждаемся, что PostgreSQL запущен
+    - name: Ensure PostgreSQL is running
+      run: |
+        sudo systemctl start postgresql
+        sudo systemctl status postgresql
+
+    # Шаг 3: Применяем миграции
+    - name: Apply migrations
+      env:
+        DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
+      run: |
+        psql "$DB_CONNECTION_STRING" -f ./migrations/migrations.sql
+
+  deploy:
+    runs-on: self-hosted
+    needs: migrate
 
     steps:
     # Шаг 1: Скачиваем артефакты
@@ -52,13 +95,8 @@ jobs:
       with:
         name: app-artifacts
         path: ./artifacts/
-
-    # Шаг 3: Убеждаемся, что PostgreSQL запущен
-    - name: Ensure PostgreSQL is running
-      run: |
-        sudo systemctl start postgresql
-        sudo systemctl status postgresql
-
+        
+    # Шаг 2: Деплой приложения
     - name: Deploy application
       env:
         DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
@@ -69,10 +107,6 @@ jobs:
         # Копируем новые файлы в рабочую директорию
         mkdir -p $DEPLOY_PATH
         cp -r ./artifacts/* $DEPLOY_PATH
-
-        # Применяем миграции
-        cd /home/okr_backend
-        dotnet ef database update
 
         # Запускаем службу
         sudo systemctl start okr_backend
