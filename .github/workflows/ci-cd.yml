@@ -46,9 +46,9 @@ jobs:
 
         sudo rm -r /home/clear_back
         sudo cp -r ./okr_backend/ /home/clear_back
-        whoami
-
-        sudo dotnet ef migrations script --output home/clear_back/migrations.sql --idempotent --project home/clear_back/
+        #whoami
+        dotnet tool install --global dotnet-ef
+        dotnet ef migrations script --output /home/clear_back/migrations.sql --idempotent --project /home/clear_back/
 
     # Шаг 8: Сохраняем артефакты для использования в следующем этапе
     - name: Upload artifacts
