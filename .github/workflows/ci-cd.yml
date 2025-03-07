@@ -42,10 +42,9 @@ jobs:
       run: |
         # Укажите путь к проекту, если он не в корне репозитория
         pwd
-        ls
-        find . -maxdepth 3  -ls
+        find ./okr_backend -maxdepth 3  -ls
         
-        dotnet ef migrations script --output ./migrations.sql --idempotent #--project ./okr_backend/okr_backend
+        dotnet ef migrations script --output ./migrations.sql --idempotent #--project ./okr_backend
 
     # Шаг 8: Сохраняем артефакты для использования в следующем этапе
     - name: Upload artifacts
