@@ -37,6 +37,12 @@ jobs:
     - name: Install EF Core tools
       run: dotnet tool install --global dotnet-ef
 
+    - name: Add .NET tools to PATH
+      run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
+    - name: Restore dependencies
+      run: dotnet restore
+
     # Шаг 7: Генерируем SQL-скрипт миграций
     - name: Generate migrations SQL script
       run: |
