@@ -53,6 +53,12 @@ jobs:
         name: app-artifacts
         path: ./artifacts/
 
+    # Шаг 3: Убеждаемся, что PostgreSQL запущен
+    - name: Ensure PostgreSQL is running
+      run: |
+        sudo systemctl start postgresql
+        sudo systemctl status postgresql
+
     - name: Deploy application
       env:
         DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
@@ -63,6 +69,10 @@ jobs:
         # Копируем новые файлы в рабочую директорию
         mkdir -p $DEPLOY_PATH
         cp -r ./artifacts/* $DEPLOY_PATH
+
+        # Применяем миграции
+        cd /home/okr_backend
+        dotnet ef database update
 
         # Запускаем службу
         sudo systemctl start okr_backend
