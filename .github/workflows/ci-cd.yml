@@ -46,11 +46,11 @@ jobs:
         # Укажите путь к проекту, если он не в корне репозитория
         #pwd
         #find ./okr_backend/ -maxdepth 2  -ls
-        
-        rm -r /home/clear_back
-        cp -r ./okr_backend/ /home/clear_back
 
-        dotnet ef migrations script --output home/clear_back/migrations.sql --idempotent --project home/clear_back/
+        sudo rm -r /home/clear_back
+        sudo cp -r ./okr_backend/ /home/clear_back
+
+        sudo dotnet ef migrations script --output home/clear_back/migrations.sql --idempotent --project home/clear_back/
 
     # Шаг 8: Сохраняем артефакты для использования в следующем этапе
     - name: Upload artifacts
