@@ -14,6 +14,18 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Настройка CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin", policy =>
+    {
+        policy.AllowAnyOrigin()    // Разрешаем запросы с любых источников
+              .AllowAnyHeader()                           // Разрешаем любые заголовки
+              .AllowAnyMethod();                          // Разрешаем любые методы
+    });
+});
+
+
 //- enumConverter
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -59,7 +71,8 @@ var app = builder.Build();
 //}
 
 //app.UseHttpsRedirection();
-
+// Включение CORS
+app.UseCors("AllowAllOrigins");
 
 //---
 
