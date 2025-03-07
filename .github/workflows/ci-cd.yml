@@ -34,8 +34,8 @@ jobs:
       run: dotnet publish --configuration Release --no-build --output ./artifacts
 
     # Шаг 6: Устанавливаем инструмент dotnet-ef
-    #- name: Install EF Core tools
-    #  run: dotnet tool install --global dotnet-ef
+    - name: Install EF Core tools
+      run: dotnet tool install --global dotnet-ef
 
     # Шаг 7: Генерируем SQL-скрипт миграций
     - name: Generate migrations SQL script
@@ -43,14 +43,9 @@ jobs:
         # Укажите путь к проекту, если он не в корне репозитория
         #pwd
         #find ./okr_backend/ -maxdepth 2  -ls
-
-        sudo rm -r /home/clear_back
-        mkdir -p /home/clear_back
-        sudo cp -r ./okr_backend/  /home/clear_back
         #whoami
 
-
-        dotnet ef migrations script --output /home/clear_back/migrations.sql --idempotent --project /home/clear_back/
+        dotnet ef migrations script --output /home/migrations.sql --idempotent --project ./okr_backend
 
     # Шаг 8: Сохраняем артефакты для использования в следующем этапе
     - name: Upload artifacts
