@@ -11,60 +11,61 @@ jobs:
     runs-on: self-hosted
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+    # Шаг 1: Клонируем репозиторий
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v2
+    # Шаг 2: Устанавливаем .NET SDK
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: '8.0.x'  
 
+    # Шаг 3: Восстанавливаем зависимости
     - name: Restore dependencies
       run: dotnet restore
 
-    - name: Build
+    # Шаг 4: Компилируем приложение
+    - name: Build application
       run: dotnet build --configuration Release --no-restore
 
-    #- name: Test
-    #  run: dotnet test --no-restore --verbosity normal
+    # Шаг 5: Публикуем приложение (создаем артефакты)
+    - name: Publish application
+      run: dotnet publish --configuration Release --no-build --output ./artifacts
+
+    # Шаг 6: Сохраняем артефакты для использования в следующем этапе
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-artifacts
+        path: ./artifacts/
+        retention-days: 1  # Артефакты будут храниться 1 день
 
   deploy:
     runs-on: self-hosted
     needs: build
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v2
+    # Шаг 1: Скачиваем артефакты
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
       with:
-        dotnet-version: '8.0.x'
+        name: app-artifacts
+        path: ./artifacts/
 
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Build
-      run: dotnet publish --configuration Release --runtime linux-x64 --output ./publish
-
-    - name: Set up SSH
+    - name: Deploy application
       env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        SERVER_HOST: ${{ secrets.SERVER_HOST }}
-      run: |
-        mkdir -p ~/.ssh
-        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -H "$SERVER_HOST" >> ~/.ssh/known_hosts
-
-    - name: Deploy to server
-      env:
-        SERVER_USER: ${{ secrets.SERVER_USER }}
-        SERVER_HOST: ${{ secrets.SERVER_HOST }}
         DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
       run: |
-        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST 
+        # Останавливаем службу
+        sudo systemctl stop okr_backend
+
+        # Копируем новые файлы в рабочую директорию
         mkdir -p $DEPLOY_PATH
-        cp -r ./publish/* $DEPLOY_PATH
-        cd $DEPLOY_PATH
-        nohup dotnet okr_backend.dll --urls "http://0.0.0.0:1223" > output.log 2>&1 &
+        cp -r ./artifacts/* $DEPLOY_PATH
+
+        # Запускаем службу
+        sudo systemctl start okr_backend
+
+        # Проверяем статус службы (опционально)
+        # sudo systemctl status okr_backend
