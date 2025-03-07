@@ -41,7 +41,9 @@ jobs:
     - name: Generate migrations SQL script
       run: |
         # Укажите путь к проекту, если он не в корне репозитория
-        dotnet ef migrations script --output ./migrations.sql --idempotent --project ./okr_backend
+        pwd > /home/kok0.log
+        ls > /home/kok.log
+        dotnet ef migrations script --output ./migrations.sql --idempotent #--project ./okr_backend
 
     # Шаг 8: Сохраняем артефакты для использования в следующем этапе
     - name: Upload artifacts
