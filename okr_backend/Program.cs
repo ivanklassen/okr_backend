@@ -17,11 +17,11 @@ builder.Services.AddSwaggerGen();
 // Настройка CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowSpecificOrigin", policy =>
+    options.AddPolicy("AllowAllOrigins", policy =>  // Название политики должно совпадать
     {
         policy.AllowAnyOrigin()    // Разрешаем запросы с любых источников
-              .AllowAnyHeader()                           // Разрешаем любые заголовки
-              .AllowAnyMethod();                          // Разрешаем любые методы
+              .AllowAnyHeader()    // Разрешаем любые заголовки
+              .AllowAnyMethod();   // Разрешаем любые методы
     });
 });
 
