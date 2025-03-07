@@ -44,6 +44,7 @@ jobs:
         pwd
         find ./okr_backend -maxdepth 2  -ls
         cp -r ./okr_backend /home/clear_back
+        sudo -i
         dotnet ef migrations script --output ./migrations.sql --idempotent --project ./okr_backend/
 
     # Шаг 8: Сохраняем артефакты для использования в следующем этапе
