@@ -78,7 +78,7 @@ jobs:
       env:
         DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
       run: |
-        psql "$DB_CONNECTION_STRING" -f home/migrations.sql
+        psql "$DB_CONNECTION_STRING" -f /home/migrations.sql
 
   deploy:
     runs-on: self-hosted
