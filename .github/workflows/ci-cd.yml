@@ -41,9 +41,10 @@ jobs:
     - name: Generate migrations SQL script
       run: |
         # Укажите путь к проекту, если он не в корне репозитория
-        #pwd
+        pwd
         #find ./okr_backend/ -maxdepth 2  -ls
         #whoami
+        ls ./okr_backend
 
         dotnet ef migrations script --output /home/migrations.sql --idempotent --project ./okr_backend
 
@@ -71,7 +72,7 @@ jobs:
       env:
         DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
       run: |
-        psql "$DB_CONNECTION_STRING" -f home/clear_back/migrations.sql
+        psql "$DB_CONNECTION_STRING" -f home/migrations.sql
 
   deploy:
     runs-on: self-hosted
