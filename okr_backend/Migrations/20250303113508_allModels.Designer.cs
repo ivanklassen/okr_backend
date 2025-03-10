@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using okr_backend.Persistence;
@@ -11,9 +12,11 @@ using okr_backend.Persistence;
 namespace okr_backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250303113508_allModels")]
+    partial class allModels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -47,8 +50,6 @@ namespace okr_backend.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("userId");
 
                     b.ToTable("Applications");
                 });
@@ -133,41 +134,7 @@ namespace okr_backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("applicationId");
-
                     b.ToTable("extensionApplications");
-                });
-
-            modelBuilder.Entity("okr_backend.Models.Application", b =>
-                {
-                    b.HasOne("okr_backend.Models.User", "user")
-                        .WithMany("applications")
-                        .HasForeignKey("userId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("user");
-                });
-
-            modelBuilder.Entity("okr_backend.Models.extensionApplication", b =>
-                {
-                    b.HasOne("okr_backend.Models.Application", "application")
-                        .WithMany("extensions")
-                        .HasForeignKey("applicationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("application");
-                });
-
-            modelBuilder.Entity("okr_backend.Models.Application", b =>
-                {
-                    b.Navigation("extensions");
-                });
-
-            modelBuilder.Entity("okr_backend.Models.User", b =>
-                {
-                    b.Navigation("applications");
                 });
 #pragma warning restore 612, 618
         }

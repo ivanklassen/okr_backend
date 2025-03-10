@@ -10,5 +10,9 @@ namespace okr_backend.Persistence
 
         public DbSet<BannedToken> BannedTokens { get; set; }
 
+        public DbSet<Application> Applications { get; set; }
+
+        public DbSet<extensionApplication> extensionApplications { get; set; }
+
     }
 }

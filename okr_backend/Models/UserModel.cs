@@ -2,7 +2,7 @@
 
 namespace okr_backend.Models
 {
-    public class User
+    public class UserModel
     {
         public Guid Id { get; set; }
 
@@ -12,14 +12,7 @@ namespace okr_backend.Models
 
         public string? patronymic { get; set; }
 
-        [MinLength(1)]
-        [Required]
         public string? email { get; set; }
-
-        [Required]
-        [MinLength(6)]
-        [MaxLength(32)]
-        public string? password { get; set; }
 
         public bool isStudent { get; set; }
 
@@ -28,8 +21,5 @@ namespace okr_backend.Models
         public bool isDean { get; set; }
 
         public bool isAdmin { get; set; }
-
-        public List<Application> applications { get; set; }
-
     }
 }

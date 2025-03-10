@@ -22,31 +22,49 @@ namespace okr_backend.Controllers
             _context = context;
         }
 
-        //[HttpPost("registration")]
-        //public async Task<IActionResult> Register([FromBody] User user)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest();
-        //    }
-        //    if (user.password != user.confirmPassword)
-        //    {
-        //        return BadRequest();
-        //    }
+        [HttpPost("registration")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AuthResponse))]
+        public async Task<IActionResult> Register([FromBody] RegistrationModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            if (model.password != model.confirmPassword)
+            {
+                return BadRequest();
+            }
 
-        //    user.Id = Guid.NewGuid();
-        //    user.isTeacher = false;
-        //    user.isStudent = false;
-        //    user.isAdmin = false;
+            var emailUser = await _context.Users.FirstOrDefaultAsync(p => p.email == model.email);
 
-        //    await _context.AddAsync(user);
-        //    await _context.SaveChangesAsync();
+            if (emailUser != null)
+            {
+                return BadRequest();
+            }
 
-        //    var token = GenerateJwtToken(user);
-        //    return Ok(token);
-        //}
+            User user = new User();
+
+            user.surname = model.surname;
+            user.name = model.name;
+            user.patronymic = model.patronymic;
+            user.email = model.email;
+            user.password = model.password;
+
+            user.Id = Guid.NewGuid();
+            user.isTeacher = false;
+            user.isStudent = true;
+            user.isAdmin = false;
+            user.isDean = false;
+
+            await _context.AddAsync(user);
+            await _context.SaveChangesAsync();
+
+            var token = GenerateJwtToken(user.Id, user.surname, user.email);
+            return Ok(new AuthResponse { Token = token });
+        }
 
         [HttpPost("login")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AuthResponse))]
         public async Task<IActionResult> login([FromBody] LoginModel loginModel)
         {
             if (!ModelState.IsValid)
@@ -60,30 +78,11 @@ namespace okr_backend.Controllers
                 return Unauthorized("Invalid email or password");
             }
 
-            var token = GenerateJwtTokenLogin(user.Id, user.fullName, user.email);
+            var token = GenerateJwtToken(user.Id, user.surname, user.email);
             return Ok(new AuthResponse { Token = token });
         }
 
-        //private string GenerateJwtToken(User user)
-        //{
-        //    var claims = new List<Claim>
-        //    {
-        //        new Claim(ClaimTypes.Name, user.fullName),
-        //        new Claim(ClaimTypes.Email, user.email)
-        //    };
-
-        //    var jwtToken = new JwtSecurityToken(
-        //        expires: DateTime.UtcNow.AddHours(2),
-        //        claims: claims,
-        //        signingCredentials:
-        //        new SigningCredentials(
-        //            new SymmetricSecurityKey(
-        //                Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"])), SecurityAlgorithms.HmacSha256));
-
-        //    return new JwtSecurityTokenHandler().WriteToken(jwtToken);
-        //}
-
-        private string GenerateJwtTokenLogin(Guid id, string fullName, string email)
+        private string GenerateJwtToken(Guid id, string fullName, string email)
         {
 
             var claims = new List<Claim>
@@ -135,6 +134,49 @@ namespace okr_backend.Controllers
                 return false;
             }
             return true;
+        }
+
+        [HttpGet("profile")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserProfileModel))]
+        public async Task<IActionResult> getCurrentUsersProfile()
+        {
+            var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var user = await _context.Users.FirstOrDefaultAsync(p => p.Id.ToString() == id);
+
+            var profile = new UserProfileModel();
+            profile.surname = user.surname;
+            profile.email = user.email;
+            profile.name = user.name;
+            profile.patronymic = user.patronymic;
+
+            return Ok(profile);
+        }
+
+        [HttpPut("profile")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserProfileModel))]
+        public async Task<IActionResult> editCurrentUsersProfile([FromBody] EditUserProfileModel model)
+        {
+            var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var user = await _context.Users.FirstOrDefaultAsync(p => p.Id.ToString() == id);
+
+
+            user.surname = model.surname;
+            user.name = model.name;
+            user.patronymic = model.patronymic;
+
+            await _context.SaveChangesAsync();
+
+            var profile = new UserProfileModel();
+            profile.surname = user.surname;
+            profile.name = user.name;
+            profile.patronymic = user.patronymic;
+            profile.email = user.email;
+
+            return Ok(profile);
         }
     }
 }
