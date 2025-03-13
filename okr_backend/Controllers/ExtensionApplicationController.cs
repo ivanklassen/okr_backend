@@ -103,6 +103,8 @@ namespace okr_backend.Controllers
                 ext.status = Status.Rejected;
             }
 
+            ext.comment = status.comment;
+
             await _context.SaveChangesAsync();
 
             FullApplicationModel model = _context.Applications.Where(p => p.Id == ext.applicationId).Include(p => p.extensions)
@@ -123,6 +125,7 @@ namespace okr_backend.Controllers
                         description = p.description,
                         image = p.image,
                         status = p.status,
+                        comment = p.comment,
                     }).ToList()
                 })
                 .FirstOrDefault();

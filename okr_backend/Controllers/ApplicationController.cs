@@ -33,6 +33,7 @@ namespace okr_backend.Controllers
                     description = p.description,
                     image = p.image,
                     status = p.status,
+                    comment = p.comment,
                     extensions = p.extensions.Select(p => new ExtensionApplicationModel
                     {
                         Id = p.Id,
@@ -41,6 +42,7 @@ namespace okr_backend.Controllers
                         description = p.description,
                         image = p.image,
                         status = p.status,
+                        comment = p.comment,
                     }).ToList()
                 })
                 .ToList();
@@ -144,6 +146,7 @@ namespace okr_backend.Controllers
                     description = p.description,
                     image = p.image,
                     status = p.status,
+                    comment = p.comment,
                     extensions = p.extensions.Select(p => new ExtensionApplicationModel
                     {
                         Id = p.Id,
@@ -152,6 +155,7 @@ namespace okr_backend.Controllers
                         description = p.description,
                         image = p.image,
                         status = p.status,
+                        comment = p.comment,
                     }).ToList()
                 })
                 .ToList();
@@ -176,6 +180,8 @@ namespace okr_backend.Controllers
                 app.status = Status.Rejected;
             }
 
+            app.comment = status.comment;
+
             await _context.SaveChangesAsync();
 
             FullApplicationModel model = _context.Applications.Where(p => p.Id == id).Include(p => p.extensions)
@@ -188,6 +194,7 @@ namespace okr_backend.Controllers
                     description = p.description,
                     image = p.image,
                     status = p.status,
+                    comment = p.comment,
                     extensions = p.extensions.Select(p => new ExtensionApplicationModel
                     {
                         Id = p.Id,
@@ -196,6 +203,7 @@ namespace okr_backend.Controllers
                         description = p.description,
                         image = p.image,
                         status = p.status,
+                        comment = p.comment,
                     }).ToList()
                 })
                 .FirstOrDefault();

@@ -15,6 +15,8 @@
 
         public Status status { get; set; }
 
+        public string? comment { get; set; }
+
         public Guid userId { get; set; }
 
         public User user { get; set; }
