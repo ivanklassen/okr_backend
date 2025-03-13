@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using okr_backend.Models;
 using okr_backend.Persistence;
@@ -6,6 +7,7 @@ using okr_backend.Persistence;
 namespace okr_backend.Controllers
 {
     [ApiController]
+    [Authorize]
     public class ExtensionApplicationController: ControllerBase
     {
         private readonly IConfiguration _configuration;
@@ -17,6 +19,7 @@ namespace okr_backend.Controllers
             _context = context;
         }
 
+        [Authorize]
         [HttpPost("extensionApplication/{applicationId}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ExtensionApplicationModel))]
         public async Task<IActionResult> createExtension([FromBody] CreateExtensionApplicationModel model, Guid applicationId)
@@ -50,6 +53,7 @@ namespace okr_backend.Controllers
             return Ok(extension);
         }
 
+        [Authorize]
         [HttpPut("extensionApplication/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ExtensionApplicationModel))]
         public async Task<IActionResult> editExtension([FromBody] CreateExtensionApplicationModel model, Guid id)
@@ -79,6 +83,7 @@ namespace okr_backend.Controllers
             return Ok(extension);
         }
 
+        [Authorize]
         [HttpDelete("extensionApplication/{id}")]
         public async Task<IActionResult> deleteExtension(Guid id)
         {
@@ -88,6 +93,7 @@ namespace okr_backend.Controllers
             return Ok();
         }
 
+        [Authorize]
         [HttpPost("extensionApplication/{id}/status")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FullApplicationModel))]
         public async Task<IActionResult> EditStatusExtensionApplication([FromBody] ChangeStatusApplication status, Guid id)
