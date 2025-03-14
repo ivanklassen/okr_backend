@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using okr_backend.Models;
 using okr_backend.Persistence;
@@ -8,6 +9,8 @@ using static System.Net.Mime.MediaTypeNames;
 namespace okr_backend.Controllers
 {
     [ApiController]
+    [Authorize]
+
     public class ApplicationController: ControllerBase
     {
         private readonly IConfiguration _configuration;
@@ -19,6 +22,7 @@ namespace okr_backend.Controllers
             _context = context;
         }
 
+        [Authorize]
         [HttpGet("application")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<FullApplicationModel>))]
         public async Task<IActionResult> getApplications()
@@ -31,16 +35,18 @@ namespace okr_backend.Controllers
                     fromDate = p.fromDate,
                     toDate = p.toDate,
                     description = p.description,
-                    image = p.image,
+                    //image = p.image,
                     status = p.status,
+                    comment = p.comment,
                     extensions = p.extensions.Select(p => new ExtensionApplicationModel
                     {
                         Id = p.Id,
                         applicationId = p.applicationId,
                         extensionToDate = p.extensionToDate,
                         description = p.description,
-                        image = p.image,
+                        //image = p.image,
                         status = p.status,
+                        comment = p.comment,
                     }).ToList()
                 })
                 .ToList();
@@ -49,6 +55,7 @@ namespace okr_backend.Controllers
             return Ok(applications);
         }
 
+        [Authorize]
         [HttpPost("application")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApplicationModel))]
         public async Task<IActionResult> createApplication([FromBody] CreateApplicationModel model)
@@ -88,6 +95,7 @@ namespace okr_backend.Controllers
             return Ok(app);
         }
 
+        [Authorize]
         [HttpPut("application/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApplicationModel))]
         public async Task<IActionResult> editApplication([FromBody] CreateApplicationModel model, Guid id)
@@ -119,6 +127,7 @@ namespace okr_backend.Controllers
             return Ok(application);
         }
 
+        [Authorize]
         [HttpDelete("application/{id}")]
         public async Task<IActionResult> deleteApplication(Guid id)
         {
@@ -128,6 +137,7 @@ namespace okr_backend.Controllers
             return Ok();
         }
 
+        [Authorize]
         [HttpGet("application/my")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<FullApplicationModel>))]
         public async Task<IActionResult> getMyApplications()
@@ -142,16 +152,18 @@ namespace okr_backend.Controllers
                     fromDate = p.fromDate,
                     toDate = p.toDate,
                     description = p.description,
-                    image = p.image,
+                    //image = p.image,
                     status = p.status,
+                    comment = p.comment,
                     extensions = p.extensions.Select(p => new ExtensionApplicationModel
                     {
                         Id = p.Id,
                         applicationId = p.applicationId,
                         extensionToDate = p.extensionToDate,
                         description = p.description,
-                        image = p.image,
+                        //image = p.image,
                         status = p.status,
+                        comment = p.comment,
                     }).ToList()
                 })
                 .ToList();
@@ -161,6 +173,7 @@ namespace okr_backend.Controllers
 
         }
 
+        [Authorize]
         [HttpPost("application/{id}/status")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FullApplicationModel))]
         public async Task<IActionResult> EditStatusApplication([FromBody] ChangeStatusApplication status, Guid id)
@@ -176,6 +189,8 @@ namespace okr_backend.Controllers
                 app.status = Status.Rejected;
             }
 
+            app.comment = status.comment;
+
             await _context.SaveChangesAsync();
 
             FullApplicationModel model = _context.Applications.Where(p => p.Id == id).Include(p => p.extensions)
@@ -188,6 +203,7 @@ namespace okr_backend.Controllers
                     description = p.description,
                     image = p.image,
                     status = p.status,
+                    comment = p.comment,
                     extensions = p.extensions.Select(p => new ExtensionApplicationModel
                     {
                         Id = p.Id,
@@ -196,11 +212,47 @@ namespace okr_backend.Controllers
                         description = p.description,
                         image = p.image,
                         status = p.status,
+                        comment = p.comment,
                     }).ToList()
                 })
                 .FirstOrDefault();
 
             return Ok(model);
+        }
+
+        [Authorize]
+        [HttpGet("application/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FullApplicationModel))]
+        public async Task<IActionResult> getApplicationById(Guid id)
+        {
+
+            FullApplicationModel application = _context.Applications.Where(p => p.Id == id).Include(p => p.extensions)
+                .Select(p => new FullApplicationModel
+                {
+                    Id = p.Id,
+                    userId = p.userId,
+                    fromDate = p.fromDate,
+                    toDate = p.toDate,
+                    description = p.description,
+                    image = p.image,
+                    status = p.status,
+                    comment = p.comment,
+                    extensions = p.extensions.Select(p => new ExtensionApplicationModel
+                    {
+                        Id = p.Id,
+                        applicationId = p.applicationId,
+                        extensionToDate = p.extensionToDate,
+                        description = p.description,
+                        image = p.image,
+                        status = p.status,
+                        comment = p.comment,
+                    }).ToList()
+                })
+                .FirstOrDefault();
+
+
+            return Ok(application);
+
         }
 
     }

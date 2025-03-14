@@ -16,6 +16,8 @@
 
         public Status status { get; set; }
 
+        public string? comment { get; set; }
+
         public List<ExtensionApplicationModel> extensions { get; set; }
     }
 }

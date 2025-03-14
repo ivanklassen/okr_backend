@@ -12,6 +12,8 @@
 
         public Status status { get; set; }
 
+        public string? comment { get; set; }
+
         public Guid applicationId { get; set; }
 
         public Application application { get; set; }

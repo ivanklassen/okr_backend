@@ -13,5 +13,7 @@
         public string? image { get; set; }
 
         public Status status { get; set; }
+
+        public string? comment { get; set; }
     }
 }

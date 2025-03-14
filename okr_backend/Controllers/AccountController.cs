@@ -178,5 +178,22 @@ namespace okr_backend.Controllers
 
             return Ok(profile);
         }
+
+        [HttpGet("profile/{id}")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserProfileModel))]
+        public async Task<IActionResult> getUsersProfileById(Guid id)
+        {
+
+            var user = await _context.Users.FirstOrDefaultAsync(p => p.Id == id);
+
+            var profile = new UserProfileModel();
+            profile.surname = user.surname;
+            profile.email = user.email;
+            profile.name = user.name;
+            profile.patronymic = user.patronymic;
+
+            return Ok(profile);
+        }
     }
 }
