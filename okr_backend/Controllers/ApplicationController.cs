@@ -34,7 +34,7 @@ namespace okr_backend.Controllers
                     fromDate = p.fromDate,
                     toDate = p.toDate,
                     description = p.description,
-                    image = p.image,
+                    //image = p.image,
                     status = p.status,
                     comment = p.comment,
                     extensions = p.extensions.Select(p => new ExtensionApplicationModel
@@ -43,7 +43,7 @@ namespace okr_backend.Controllers
                         applicationId = p.applicationId,
                         extensionToDate = p.extensionToDate,
                         description = p.description,
-                        image = p.image,
+                        //image = p.image,
                         status = p.status,
                         comment = p.comment,
                     }).ToList()
@@ -151,7 +151,7 @@ namespace okr_backend.Controllers
                     fromDate = p.fromDate,
                     toDate = p.toDate,
                     description = p.description,
-                    image = p.image,
+                    //image = p.image,
                     status = p.status,
                     comment = p.comment,
                     extensions = p.extensions.Select(p => new ExtensionApplicationModel
@@ -160,7 +160,7 @@ namespace okr_backend.Controllers
                         applicationId = p.applicationId,
                         extensionToDate = p.extensionToDate,
                         description = p.description,
-                        image = p.image,
+                        //image = p.image,
                         status = p.status,
                         comment = p.comment,
                     }).ToList()
@@ -217,6 +217,41 @@ namespace okr_backend.Controllers
                 .FirstOrDefault();
 
             return Ok(model);
+        }
+
+        [Authorize]
+        [HttpGet("application/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FullApplicationModel))]
+        public async Task<IActionResult> getApplicationById(Guid id)
+        {
+
+            FullApplicationModel application = _context.Applications.Where(p => p.Id == id).Include(p => p.extensions)
+                .Select(p => new FullApplicationModel
+                {
+                    Id = p.Id,
+                    userId = p.userId,
+                    fromDate = p.fromDate,
+                    toDate = p.toDate,
+                    description = p.description,
+                    image = p.image,
+                    status = p.status,
+                    comment = p.comment,
+                    extensions = p.extensions.Select(p => new ExtensionApplicationModel
+                    {
+                        Id = p.Id,
+                        applicationId = p.applicationId,
+                        extensionToDate = p.extensionToDate,
+                        description = p.description,
+                        image = p.image,
+                        status = p.status,
+                        comment = p.comment,
+                    }).ToList()
+                })
+                .FirstOrDefault();
+
+
+            return Ok(application);
+
         }
 
     }
