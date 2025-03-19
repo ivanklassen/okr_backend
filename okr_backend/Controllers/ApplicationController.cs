@@ -105,6 +105,8 @@ namespace okr_backend.Controllers
                 return BadRequest();
             }
 
+            if (_context.Applications.FirstOrDefault(p => p.Id == id) == null) return NotFound();
+
             var app = await _context.Applications.FirstOrDefaultAsync(p => p.Id == id);
 
             app.fromDate = model.fromDate;
@@ -131,6 +133,7 @@ namespace okr_backend.Controllers
         [HttpDelete("application/{id}")]
         public async Task<IActionResult> deleteApplication(Guid id)
         {
+            if (_context.Applications.FirstOrDefault(p => p.Id == id) == null) return NotFound();
 
             await _context.Applications.Where(p => p.Id == id).ExecuteDeleteAsync();
 
@@ -178,6 +181,8 @@ namespace okr_backend.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FullApplicationModel))]
         public async Task<IActionResult> EditStatusApplication([FromBody] ChangeStatusApplication status, Guid id)
         {
+            if (_context.Applications.FirstOrDefault(p => p.Id == id) == null) return NotFound();
+
             var app = await _context.Applications.FirstOrDefaultAsync(p => p.Id == id);
 
             if (status.status == Status.Accepted)
@@ -225,6 +230,7 @@ namespace okr_backend.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FullApplicationModel))]
         public async Task<IActionResult> getApplicationById(Guid id)
         {
+            if (_context.Applications.FirstOrDefault(p => p.Id == id) == null) return NotFound();
 
             FullApplicationModel application = _context.Applications.Where(p => p.Id == id).Include(p => p.extensions)
                 .Select(p => new FullApplicationModel

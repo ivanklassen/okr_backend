@@ -65,6 +65,8 @@ namespace okr_backend.Controllers
                 return BadRequest();
             }
 
+            if (_context.extensionApplications.FirstOrDefault(p => p.Id == id) == null) return NotFound();
+
             var ext = await _context.extensionApplications.FirstOrDefaultAsync(p => p.Id == id);
 
             ext.extensionToDate = model.extensionToDate;
@@ -89,6 +91,7 @@ namespace okr_backend.Controllers
         [HttpDelete("extensionApplication/{id}")]
         public async Task<IActionResult> deleteExtension(Guid id)
         {
+            if (_context.extensionApplications.FirstOrDefault(p => p.Id == id) == null) return NotFound();
 
             await _context.extensionApplications.Where(p => p.Id == id).ExecuteDeleteAsync();
 
@@ -100,6 +103,8 @@ namespace okr_backend.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FullApplicationModel))]
         public async Task<IActionResult> EditStatusExtensionApplication([FromBody] ChangeStatusApplication status, Guid id)
         {
+            if (_context.extensionApplications.FirstOrDefault(p => p.Id == id) == null) return NotFound();
+
             var ext = await _context.extensionApplications.FirstOrDefaultAsync(p => p.Id == id);
 
             if (status.status == Status.Accepted)

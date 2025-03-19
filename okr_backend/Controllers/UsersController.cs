@@ -49,22 +49,38 @@ namespace okr_backend.Controllers
                 return BadRequest();
             }
 
+            var idUser = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var userRole = await _context.Users.FirstOrDefaultAsync(p => p.Id.ToString() == idUser);
+
+
             var user = await _context.Users.FirstOrDefaultAsync(p => p.Id == id);
 
             if (role.role == Role.Student)
             {
+                if (userRole.isAdmin == false && userRole.isDean == false) return Forbid();
+
                 user.isStudent = !user.isStudent;
             }
+
             if (role.role == Role.Teacher)
             {
+                if (userRole.isAdmin == false && userRole.isDean == false) return Forbid();
+
                 user.isTeacher = !user.isTeacher;
             }
+
             if (role.role == Role.Dean)
             {
+                if (userRole.isAdmin == false) return Forbid();
+
                 user.isDean = !user.isDean;
             }
+
             if (role.role == Role.Admin)
             {
+                if (userRole.isAdmin == false) return Forbid();
+
                 user.isAdmin = !user.isAdmin;
             }
 

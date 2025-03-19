@@ -15,6 +15,7 @@ namespace okr_backend.Models
 
         [MinLength(1)]
         [Required]
+        [EmailAddress]
         public string? email { get; set; }
 
         [Required]
