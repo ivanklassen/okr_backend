@@ -199,6 +199,11 @@ namespace okr_backend.Controllers
             profile.name = user.name;
             profile.patronymic = user.patronymic;
 
+            profile.isStudent = user.isStudent;
+            profile.isTeacher = user.isTeacher;
+            profile.isDean = user.isDean;
+            profile.isAdmin = user.isAdmin;
+            
             return Ok(profile);
         }
     }
